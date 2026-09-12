@@ -1,282 +1,163 @@
-# AI PM 简历流水线（ai-pm-resume-pipeline）
+# AI PM Resume Pipeline
 
-面向 **AI 产品经理 / B 端产品经理 / 大模型应用产品经理** 的简历 Skill。  
-把原来两套 Skill 合成一条流水线：**先搭完整简历骨架，再把项目段升级成能扛面试追问的冲刺版**。
+AI产品经理 / B端产品经理 / 大模型应用产品经理简历流水线 Skill。
 
-| 原 Skill | 合并后角色 |
-|---|---|
-| `ai-pm-resume` | **Mode A**：从零引导采集 → 生成五板块 Markdown 简历（项目用 STAR 骨架） |
-| `resume-pm-rewriter` | **Mode B**：把项目经历从「执行动作堆砌」改成「痛点→机制→价值」+ 面试追问题 |
-| （新增） | **Full Pipeline**：先跑 A，再对项目逐个跑 B，得到可投递冲刺终稿 |
+合并原 `ai-pm-resume`（从零构建）与 `resume-pm-rewriter`（项目升级），支持三模式：Mode A 从零生成完整简历、Mode B 升级已有项目经历、Full Pipeline 先 A 后 B 出冲刺终稿。
 
-Agent 真正执行时读的是同目录下的 `SKILL.md`；本 README 说明**你怎么用、说什么、会得到什么**。
+## 核心能力
 
----
+1. **Mode A（从零构建）**：引导式填空采集五板块信息，按 AI PM 方法论改写为完整 Markdown 简历（项目段先用 STAR 骨架）。
+2. **Mode B（项目升级）**：将项目经历从"执行动作堆砌"重构为"**业务痛点抽象—产品判断—机制设计—价值闭环**"，并同步输出面试追问题。
+3. **Full Pipeline（推荐）**：先跑 Mode A 出骨架，再对核心项目逐个跑 Mode B，替换项目段得到可投递冲刺版。
 
-## 一句话理解
+支持可选填入岗位 JD：判定应用层/模型层/基础设施层，抽取岗位画像并定向突出匹配项；禁止编造数据。
 
-```
-没有简历 ──► Mode A 出骨架 ──► Mode B 升级项目 ──► 冲刺版简历 + 面试题库
-已有简历/项目段 ─────────────────► Mode B 升级项目 ──► 更好的项目段 + 面试题库
-```
+## 工作流程
 
-- **Mode A** 解决：结构全、能填满、能投基础岗。  
-- **Mode B** 解决：项目不像流水账、面试官能看出产品判断。  
-- **Full Pipeline** 解决：从零一路做到冲刺版（推荐默认路径）。
-
----
-
-## 安装与启用
-
-### 1. 安装到 Cursor（二选一）
-
-**全局（所有项目可用）：**
-
-```bash
-cp -R "/Users/gmx/Downloads/2 project/skills/ai-pm-resume-pipeline" \
-  ~/.cursor/skills/ai-pm-resume-pipeline
-```
-
-**仅当前项目：**
-
-```bash
-mkdir -p .cursor/skills
-cp -R "/Users/gmx/Downloads/2 project/skills/ai-pm-resume-pipeline" \
-  .cursor/skills/ai-pm-resume-pipeline
-```
-
-### 2. 避免和旧 Skill 抢触发词（重要）
-
-若 `~/.cursor/skills/` 里还有：
-
-- `ai-pm-resume`
-- `resume-pm-rewriter`（或 `resume-pm-rewriter-master`）
-
-请**移走或改名**，只保留 `ai-pm-resume-pipeline`。否则「写简历 / 改项目」可能仍触发旧 Skill。
-
-### 3. 新开对话后再用
-
-安装或覆盖后，**新开一条 Agent 对话**，再说下面的指令。旧对话不一定会加载到新 Skill。
-
-### 4. 可选脚本（可跳过）
-
-`scripts/` 里的 JD/市场扫描是加分项，**不装也能完整用 A/B/Pipeline**。需要时：
-
-```bash
-cd ~/.cursor/skills/ai-pm-resume-pipeline   # 或你的安装路径
-pip install -r requirements.txt
-```
-
----
-
-## 怎么用：先选模式，再发指令
-
-在 Cursor 对话里直接说自然语言即可。不必手动 `@` 文件；Skill 会按描述自动触发。  
-若担心没触发，可先说一句：**「用 ai-pm-resume-pipeline」**，再跟具体需求。
-
-### 模式对照（怎么选）
-
-| 你的情况 | 选哪个 | 你该说什么（可直接复制） |
-|---|---|---|
-| 没有完整简历，想从零做到能冲 AI/B 端 | **Full Pipeline（推荐）** | `用简历流水线，从零做到冲刺版` |
-| 只要完整骨架，项目先不打磨 | **Mode A only** | `只要从零搭简历骨架，先不升级项目` |
-| 已有简历/项目描述，要改项目冲 AI PM | **Mode B** | `升级这段项目经历，按 Mode B 改` |
-| 有目标 JD，希望更贴岗 | 任意模式 + 贴 JD | `对照下面这份 JD 做简历：……` |
-
-### 默认规则（Agent 会自动选）
-
-| 你怎么说 | Agent 默认模式 |
-|---|---|
-| 「写简历 / 生成简历」且没贴旧稿 | Full Pipeline |
-| 「改这段 / 润色 / 重构 / 优化项目」或贴了项目段 | Mode B |
-| 「只要骨架、先不打磨」 | Mode A only |
-
-可随时纠正，例如：`不要跑 B，只要 A` 或 `骨架可以了，开始升级项目`。
-
----
-
-## 各模式：你会经历什么、要准备什么
-
-### Mode A — 从零构建
-
-**适合**：转行、空白、旧简历不可用。  
-**你要准备**：真实经历素材（公司/时间/项目事实）；有 JD 可一并贴上。  
-**Agent 会做什么（按顺序，每步等你确认）：**
-
-1. 展示 5 大板块清单（基本信息 / 自我介绍 / 教育 / 工作 / 项目）  
-2. 可选：收 JD → 判定应用层/模型层/基建层 → 岗位画像  
-3. **一次问一个板块**；字段有字符上下限，过短/过长会提示  
-4. 按方法论**改写**成 Markdown（不是把你的话原样拼接）  
-5. 项目段先用 **STAR 骨架**（背景/目标/主要工作/成果）  
-6. 若有 JD，文末附「岗位匹配说明」（投递前可删）  
-7. 你确认满意后，才问是否转 Word/PDF  
-
-**Full Pipeline 下的注意**：A 阶段项目只求**事实写全**，不要追求「听起来很厉害」——锋利表达留给 Mode B。
-
-**Mode A 产出示例：**
-
-- 一份完整 Markdown 简历（五板块）  
-- （可选）岗位匹配说明  
-- （可选）Word/PDF  
-
----
-
-### Mode B — 已有简历 / 项目升级
-
-**适合**：已有简历，要冲 AI/B 端；或只想改某个项目。  
-**你要准备**：粘贴**一个**项目的原文（或整份旧简历，Agent 会标出建议改哪几段）。  
-**Agent 会做什么（逐步确认，不会一次甩终稿）：**
-
-1. 核心矛盾提炼（3–5 句）  
-2. 痛点词（格式：`具体原因（凝练结果词）`）  
-3. 解法机制提炼  
-4. 可突出的产品能力判断  
-5. 项目总述：**稳健版 + 锋利版** → 你选一版  
-6. **一次改一条 Bullet**（含能力映射说明 + 面试信号）→ 你确认后再下一条  
-7. 成果段（效果提升 + 能力沉淀 + 扩展；**只用真实数据**）  
-8. 输出可粘贴进简历的整合版 + 同步写**面试追问题库**  
-
-**Mode B 产出示例：**
-
-- 项目总述 + 机制型 Bullet + 成果段  
-- `[项目名] — 面试追问题库`  
-- （若给了整份简历）建议：哪些段升级、哪些段不动  
-
-**一次只升级一个项目**；做完再问下一个。
-
----
-
-### Full Pipeline — 先 A 后 B（推荐）
-
-**适合**：从零做到冲刺版。  
-**流程：**
+### Full Pipeline（默认推荐）
 
 ```
-你说「从零做到冲刺版」
-        ↓
-    跑完 Mode A（骨架确认）
-        ↓
-Agent 列出全部项目，问：先升级哪 1～2 个最能代表 AI/B 端能力的？
-        ↓
-    对选中项目逐个跑 Mode B
-        ↓
-用 B 的结果【替换】简历里对应「项目介绍」章节
-        ↓
-整合终稿 Markdown + 面试题库（+ 更新岗位匹配说明）
-        ↓
-确认后再转 Word/PDF
+展示 5 大板块信息清单 → 可选填入 JD → 岗位画像
+    ↓
+逐板块引导采集（字符上下限校验）→ 生成 STAR 骨架 Markdown
+    ↓
+用户确认骨架 → 选择要升级的 1～2 个核心项目
+    ↓
+Mode B：核心矛盾 → 痛点词 → 机制 → 总述（稳健/锋利）
+    ↓
+逐条 Bullet 改写（含逐词能力映射）→ 成果段 → 替换进简历
+    ↓
+整合冲刺终稿 + 面试追问题库 → 确认后转 Word / PDF
 ```
 
-**建议**：优先升级 1～2 个核心项目即可，不必一次改光所有项目。
-
----
-
-## 推荐话术（复制即用）
-
-**从零到冲刺版：**
+### Mode A only
 
 ```
-用 ai-pm-resume-pipeline，走 Full Pipeline。
-目标岗位：AI 产品经理（应用层）。
-有 JD 的话我下一条消息贴；没有就按通用版。
-请先展示要填的信息清单，不要直接开写。
+展示清单 → 可选 JD → 逐板块采集 → 方法论改写 → Markdown 骨架 → 确认 → 转文件
 ```
 
-**只要骨架：**
+### Mode B only
 
 ```
-用简历流水线 Mode A only：从零生成完整 Markdown 简历，项目先用 STAR，先不跑 Mode B。
+输入项目经历（或整份旧简历）
+    ↓
+核心矛盾提炼 → 痛点词提炼 → 解法机制提炼 → 可突出能力判断
+    ↓
+项目总述（稳健版/锋利版）→ 用户确认
+    ↓
+逐条 Bullet 改写（每条含逐词能力映射）→ 用户逐条确认
+    ↓
+成果段 → 最终整合版
+    ↓
+同步输出面试追问题文件
 ```
 
-**只升级已有项目：**
+## 核心机制
 
-```
-用简历流水线 Mode B，升级下面这个项目（不要改其他板块）。
-目标：AI / B 端产品经理表达，输出稳健版和锋利版总述，并生成面试追问题。
+| 机制 | 说明 |
+|------|------|
+| **三模式路由** | 无旧稿默认 Full Pipeline；贴项目/说润色改写走 Mode B；明确「只要骨架」走 Mode A |
+| **先清单后逐问** | Mode A 先展示 5 大板块，一次只推进一个板块，答完确认再问下一组 |
+| **字符上下限校验** | 每个字段标注下限–上限；过短提示扩写、过长提示精简、套话改写为具体能力 |
+| **A 保事实 / B 保锋利** | Mode A 项目只求事实完整；锋利机制表达留给 Mode B，避免骨架阶段过度包装 |
+| **颗粒度三层控制** | 总述讲矛盾、Bullet 讲机制、成果段讲数据，严格分层 |
+| **痛点词规范** | "原因（结果词）"格式，原因与结果语义不重复 |
+| **逐词能力映射** | 每条 Bullet 的模块名逐词解释体现什么 PM 能力 |
+| **面试题联动** | 每条 Bullet 确认后同步写入面试追问题文件 |
+| **总述差异化** | 同一简历多个项目不同句式结构，避免同质化 |
+| **可选 JD 定向** | 判定岗位类型 + 排序/措辞对齐 + 岗位匹配说明（缺口如实提示，不硬凑） |
+| **禁止编造数据** | 无真实数字写定性结果或标 `[待补数据]`，不允许「合理估算」百分比 |
 
-【项目原文】
-……粘贴……
-```
-
-**对照 JD：**
-
-```
-用简历流水线，对照下面 JD 做（我选 Full Pipeline / 或 Mode B）。
-请先给出岗位类型判定和岗位画像，再开始。
-
-【JD】
-……粘贴……
-```
-
-**A 做完后继续 B：**
-
-```
-骨架可以了。进入 Mode B，先升级「×××」这个项目。
-```
-
----
-
-## 使用中你要注意的事
-
-1. **按板块/按步骤确认**，不要期待 Agent 一次写完整份终稿（尤其 Mode B）。  
-2. **没有的数据不要凑**。Skill 禁止「合理估算」百分比；没有数字就写定性结果或标 `[待补数据]`。  
-3. **角色别夸大**：协助 ≠ 主导；demo ≠ 已上线。面试会追问。  
-4. 有 JD 时，缺口会写在「岗位匹配说明」里——这是给你看的，**投递前删掉**。  
-5. 中途可改模式：`暂停 B，先导出当前骨架` / `跳过这个项目，升级下一个`。
-
----
-
-## 合并后相对原两套的变化
-
-| 点 | 说明 |
-|---|---|
-| 统一入口 | 一个 Skill 覆盖「写」和「改」，减少触发冲突 |
-| 分工清晰 | A = 结构与事实；B = 项目叙事与面试题面 |
-| 假数据红线 | 取消原 A 中「可合理估算」；与 B 一致禁止编造 |
-| JD | 以 `04-jd-tailoring.md` 岗位画像为主；脚本仅可选补充 |
-| 市场扫描脚本 | 可选；招聘站常反爬，失败就跳过，不影响主流程 |
-
----
-
-## 目录说明
+## 目录结构
 
 ```
 ai-pm-resume-pipeline/
-├── SKILL.md                      # Agent 执行指令（模式路由 + 流程）
-├── README.md                     # 本说明（给人看）
-├── requirements.txt              # 仅可选脚本依赖
-├── references/
-│   ├── 01-methodology.md         # 简历方法论、能力模型、电话面试要点
-│   ├── 02-intake-fields.md       # Mode A 字段、字符上下限、校验
-│   ├── 03-output-format.md       # Markdown 模板（含 STAR 骨架 / B 冲刺版）
-│   ├── 04-jd-tailoring.md        # JD 分层判定、岗位画像、匹配说明
-│   ├── 05-project-rewrite.md     # Mode B 改写规则、公式、禁止项
-│   └── 06-ai-pm-glossary.md      # RAG/Agent 等术语正确用法
-└── scripts/                      # 可选，非主流程必需
-    ├── jd_analyzer.py            # JD 关键词提取（固定词表）
-    └── market_scanner.py         # 市场热词扫描（易失败可跳过）
+├── SKILL.md                      # Skill 主文件（模式路由 + 流程编排）
+├── README.md                     # 说明文档
+├── requirements.txt              # 可选脚本依赖
+├── scripts/
+│   ├── jd_analyzer.py            # JD 解析与关键词提取
+│   └── market_scanner.py         # AI PM 市场趋势扫描
+└── references/
+    ├── 01-methodology.md         # 简历方法论（能力模型/板块规则/电话面试）
+    ├── 02-intake-fields.md       # Mode A 字段定义 + 字符上下限 + 校验
+    ├── 03-output-format.md       # Markdown 模板（STAR 骨架 / B 冲刺版）
+    ├── 04-jd-tailoring.md        # JD 岗位类型判定 + 定向突出 + 匹配说明
+    ├── 05-project-rewrite.md     # Mode B 改写规则、公式、禁止项
+    └── 06-ai-pm-glossary.md      # AI 产品经理术语表与用法参考
 ```
 
-| 你想了解 | 打开 |
-|---|---|
-| Agent 具体怎么跑 | `SKILL.md` |
-| 每个字段怎么填、字数限制 | `references/02-intake-fields.md` |
-| 项目 Bullet 怎么才算「高级」 | `references/05-project-rewrite.md` |
-| 简历最终长什么样 | `references/03-output-format.md` |
+## 脚本使用
 
----
+脚本为可选补充；主流程（A / B / Pipeline）不依赖脚本。JD 定向以 `references/04-jd-tailoring.md` 岗位画像为主。
 
-## 最终你应拿到什么
+### JD 解析
 
-| 阶段 | 交付物 |
-|---|---|
-| Mode A 结束 | 完整 Markdown 简历（项目为 STAR） |
-| Mode B / Pipeline 结束 | 项目冲刺版（总述 + 机制 Bullet + 成果） |
-| 同步 | 各项目面试追问题库 |
-| 有 JD 时 | 岗位匹配说明（投递前删除） |
-| 你确认后 | 可选 Word / PDF |
+```bash
+# 从 URL 解析 JD
+python scripts/jd_analyzer.py --url "https://example.com/job/12345"
 
----
+# 从本地文件解析
+python scripts/jd_analyzer.py --file jd.txt
+
+# 与简历内容对比，输出匹配度
+python scripts/jd_analyzer.py --file jd.txt --resume resume.txt
+```
+
+### 市场趋势扫描
+
+```bash
+# 扫描 AI 产品经理岗位热词
+python scripts/market_scanner.py --role "AI产品经理"
+
+# 指定平台
+python scripts/market_scanner.py --role "AI产品经理" --platform boss
+
+# 输出 markdown 报告
+python scripts/market_scanner.py --role "AI产品经理" --output report.md
+```
+
+> 招聘站常反爬，扫描失败可直接跳过，不影响主流程。
+
+## 安装依赖
+
+```bash
+pip install -r requirements.txt
+```
+
+## 安装
+
+### Cursor / Claude Code
+
+```bash
+# 全局可用
+cp -R ai-pm-resume-pipeline ~/.cursor/skills/ai-pm-resume-pipeline
+
+# 或仅当前项目
+mkdir -p .cursor/skills && cp -R ai-pm-resume-pipeline .cursor/skills/ai-pm-resume-pipeline
+```
+
+若仍装有旧版 `ai-pm-resume` / `resume-pm-rewriter`，建议移走以免触发词冲突。安装后请**新开对话**再使用。
+
+### Claude.ai / App 网页版
+
+上传同目录下的 `ai-pm-resume-pipeline.skill`：
+
+1. 打开 Claude.ai → **Settings → Skills**
+2. 上传 `ai-pm-resume-pipeline.skill`
+3. 对话里说「帮我写 AI 产品经理简历」或「用简历流水线从零做到冲刺版」即可
+
+> `.skill` 为 zip 包，内含 `SKILL.md` + `references/`。修改 references 后需重新打包再上传。
+
+## 触发方式
+
+在 Cursor / Claude / Windsurf 中使用以下触发词：
+
+> 写简历、做简历、生成简历、简历优化、简历润色、项目经历改写、帮我改简历、简历重构、包装项目、STAR、对照 JD 改简历、resume rewrite、项目描述优化
+
+模式口令示例：
+
+> 用简历流水线从零做到冲刺版｜只要骨架先不升级项目｜按 Mode B 升级这段项目经历
 
 ## License
 
