@@ -9,6 +9,7 @@ AI产品经理 / B端产品经理 / 大模型应用产品经理简历流水线 S
 1. **Mode A（从零构建）**：引导式填空采集五板块信息，按 AI PM 方法论改写为完整 Markdown 简历（项目段先用 STAR 骨架）。
 2. **Mode B（项目升级）**：将项目经历从"执行动作堆砌"重构为"**业务痛点抽象—产品判断—机制设计—价值闭环**"，并同步输出面试追问题。
 3. **Full Pipeline（推荐）**：先跑 Mode A 出骨架，再对核心项目逐个跑 Mode B，替换项目段得到可投递冲刺版。
+4. **撰写后热词 enrichment**：自动执行 `market_scanner.py`，用岗位热词对齐简历措辞（无证据不硬凑）。
 
 支持可选填入岗位 JD：判定应用层/模型层/基础设施层，抽取岗位画像并定向突出匹配项；禁止编造数据。
 
@@ -25,15 +26,21 @@ AI产品经理 / B端产品经理 / 大模型应用产品经理简历流水线 S
     ↓
 Mode B：核心矛盾 → 痛点词 → 机制 → 总述（稳健/锋利）
     ↓
-逐条 Bullet 改写（含逐词能力映射）→ 成果段 → 替换进简历
+逐条 Bullet 改写（含逐词能力映射）→ 成果段
     ↓
-整合冲刺终稿 + 面试追问题库 → 确认后转 Word / PDF
+映射为 STAR 冲刺版（背景/目标/主要工作/成果）并替换进简历
+    ↓
+自动执行 market_scanner 岗位热词扫描 → enrichment 简历措辞
+    ↓
+整合冲刺终稿 + 热词说明 + 面试追问题库 → 确认后转 Word / PDF
 ```
 
 ### Mode A only
 
 ```
-展示清单 → 可选 JD → 逐板块采集 → 方法论改写 → Markdown 骨架 → 确认 → 转文件
+展示清单 → 可选 JD → 逐板块采集 → 方法论改写 → Markdown 骨架
+    ↓
+自动 market_scanner 热词扫描 → enrichment → 确认 → 转文件
 ```
 
 ### Mode B only
@@ -43,14 +50,19 @@ Mode B：核心矛盾 → 痛点词 → 机制 → 总述（稳健/锋利）
     ↓
 核心矛盾提炼 → 痛点词提炼 → 解法机制提炼 → 可突出能力判断
     ↓
-项目总述（稳健版/锋利版）→ 用户确认
+项目总述（稳健版/锋利版）→ 用户确认（中间态）
     ↓
-逐条 Bullet 改写（每条含逐词能力映射）→ 用户逐条确认
+逐条 Bullet 改写（每条含逐词能力映射）→ 用户逐条确认（中间态）
     ↓
-成果段 → 最终整合版
+成果段 → 映射为 STAR 终稿（背景/目标/主要工作/成果）
+    ↓
+自动 market_scanner 热词扫描 → enrichment
     ↓
 同步输出面试追问题文件
 ```
+
+> Mode B 升级的是**内容密度**；简历展示版式始终与 Mode A 相同，使用 STAR。  
+> **撰写后强制**跑 `scripts/market_scanner.py` 做岗位热词 enrichment（失败则静态词表降级，不可跳过 enrichment）。
 
 ## 核心机制
 
@@ -60,7 +72,9 @@ Mode B：核心矛盾 → 痛点词 → 机制 → 总述（稳健/锋利）
 | **先清单后逐问** | Mode A 先展示 5 大板块，一次只推进一个板块，答完确认再问下一组 |
 | **字符上下限校验** | 每个字段标注下限–上限；过短提示扩写、过长提示精简、套话改写为具体能力 |
 | **A 保事实 / B 保锋利** | Mode A 项目只求事实完整；锋利机制表达留给 Mode B，避免骨架阶段过度包装 |
-| **颗粒度三层控制** | 总述讲矛盾、Bullet 讲机制、成果段讲数据，严格分层 |
+| **颗粒度三层控制** | 打磨时总述讲矛盾、Bullet 讲机制、成果讲数据；**终稿折叠进 STAR 四栏** |
+| **STAR 终稿强制** | Mode B / Pipeline 结束后项目段必须仍是背景/目标/主要工作/成果，不改版式 |
+| **撰写后热词 enrichment** | 自动 `python scripts/market_scanner.py --role "…"`，用市场热词对齐措辞；无证据的热词只进缺口说明 |
 | **痛点词规范** | "原因（结果词）"格式，原因与结果语义不重复 |
 | **逐词能力映射** | 每条 Bullet 的模块名逐词解释体现什么 PM 能力 |
 | **面试题联动** | 每条 Bullet 确认后同步写入面试追问题文件 |
@@ -74,24 +88,40 @@ Mode B：核心矛盾 → 痛点词 → 机制 → 总述（稳健/锋利）
 ai-pm-resume-pipeline/
 ├── SKILL.md                      # Skill 主文件（模式路由 + 流程编排）
 ├── README.md                     # 说明文档
-├── requirements.txt              # 可选脚本依赖
+├── requirements.txt              # market_scanner / jd_analyzer 依赖
 ├── scripts/
-│   ├── jd_analyzer.py            # JD 解析与关键词提取
-│   └── market_scanner.py         # AI PM 市场趋势扫描
+│   ├── jd_analyzer.py            # JD 解析与关键词提取（可选）
+│   └── market_scanner.py         # 岗位热词扫描（撰写后强制）
 └── references/
     ├── 01-methodology.md         # 简历方法论（能力模型/板块规则/电话面试）
     ├── 02-intake-fields.md       # Mode A 字段定义 + 字符上下限 + 校验
     ├── 03-output-format.md       # Markdown 模板（STAR 骨架 / B 冲刺版）
     ├── 04-jd-tailoring.md        # JD 岗位类型判定 + 定向突出 + 匹配说明
     ├── 05-project-rewrite.md     # Mode B 改写规则、公式、禁止项
-    └── 06-ai-pm-glossary.md      # AI 产品经理术语表与用法参考
+    ├── 06-ai-pm-glossary.md      # AI 产品经理术语表与用法参考
+    └── 07-market-enrich.md       # 撰写后热词扫描 enrichment 规则
 ```
 
 ## 脚本使用
 
-脚本为可选补充；主流程（A / B / Pipeline）不依赖脚本。JD 定向以 `references/04-jd-tailoring.md` 岗位画像为主。
+### 岗位热词扫描（撰写后强制）
 
-### JD 解析
+简历 Markdown 生成后自动执行，用热词 enrichment 措辞（详见 `references/07-market-enrich.md`）：
+
+```bash
+# 扫描 AI 产品经理岗位热词
+python scripts/market_scanner.py --role "AI产品经理"
+
+# 写出报告供 enrichment
+python scripts/market_scanner.py --role "AI产品经理" --output market_scan_report.md
+
+# 指定平台（易反爬；失败则改 general 或走静态词表降级）
+python scripts/market_scanner.py --role "AI产品经理" --platform boss
+```
+
+### JD 解析（可选）
+
+JD 定向以 `references/04-jd-tailoring.md` 岗位画像为主；脚本仅作补充。
 
 ```bash
 # 从 URL 解析 JD
@@ -104,20 +134,7 @@ python scripts/jd_analyzer.py --file jd.txt
 python scripts/jd_analyzer.py --file jd.txt --resume resume.txt
 ```
 
-### 市场趋势扫描
-
-```bash
-# 扫描 AI 产品经理岗位热词
-python scripts/market_scanner.py --role "AI产品经理"
-
-# 指定平台
-python scripts/market_scanner.py --role "AI产品经理" --platform boss
-
-# 输出 markdown 报告
-python scripts/market_scanner.py --role "AI产品经理" --output report.md
-```
-
-> 招聘站常反爬，扫描失败可直接跳过，不影响主流程。
+> 招聘站常反爬：扫描失败须按 `07-market-enrich.md` **降级 enrichment**，不可静默跳过 enrichment。
 
 ## 安装依赖
 

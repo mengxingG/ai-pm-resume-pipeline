@@ -35,7 +35,7 @@ PLATFORM_QUERIES = {
     "boss": "site:zhipin.com {role} 岗位职责 任职要求",
     "lagou": "site:lagou.com {role} 岗位描述",
     "liepin": "site:liepin.com {role} 职位要求",
-    "general": "{role} 岗位职责 任职要求 JD 2025",
+    "general": "{role} 岗位职责 任职要求 JD 2026",
 }
 
 HEADERS = {
